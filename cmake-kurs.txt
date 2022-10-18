@@ -1,0 +1,17 @@
+
+* Makefile targets:
+  targetName: dependecies
+  <tab>          Command
+
+in shell:
+   make targetName
+
+debug-mode: -g
+
+keine Optimierung: -O0
+höchste Optimierung: -O3
+
+starte Makefjile und übergebe einen Wert an eine Variable:
+make build DEBUG=1
+
+Warnungslevel:  -Wall -Wextra -Wpedantic -Wconversion

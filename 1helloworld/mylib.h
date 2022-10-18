@@ -1,3 +1,4 @@
-#pragma
+
+#pragma once
 
 void printHW();
