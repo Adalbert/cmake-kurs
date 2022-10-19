@@ -4,5 +4,6 @@
 
 
 void printHW() {
-   std::cout << "Hallo swiat!" << std::endl;
+
+   std::cout << "Hallo debug|release world!" << std::endl;
 }

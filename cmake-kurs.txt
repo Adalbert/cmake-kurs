@@ -15,3 +15,19 @@ starte Makefjile und übergebe einen Wert an eine Variable:
 make build DEBUG=1
 
 Warnungslevel:  -Wall -Wextra -Wpedantic -Wconversion
+
+patsubst = pattern substitution string
+
+hier werden neue dateiNAMEN erzeugt, aud zwar aus den *.cpp ein *.o DateiNAME (keine Datei!!)
+CPP_OBJECTS = $(patsubst %.cpp, %.o, $(CPP_SRCS))
+
+
+Important Shortcuts of the Makefile Template:
+    $@: the file name of the target
+    $<: the name of the first dependency
+    $^: the names of all dependencies
+
+Pattern (targetPattern):
+   %.o : %.cpp  => eird ersetzt zur   mylib.o : mylib.cpp   (target : dependecies)
+
+   $(CPP_COMPILER_CALL) -c $< -o $@  => g++ -03 -Wall ..  -c (the name of the first dependency, hier mylib.cpp) -o (the file name of the target, jier mylib.o)
