@@ -31,3 +31,13 @@ Pattern (targetPattern):
    %.o : %.cpp  => eird ersetzt zur   mylib.o : mylib.cpp   (target : dependecies)
 
    $(CPP_COMPILER_CALL) -c $< -o $@  => g++ -03 -Wall ..  -c (the name of the first dependency, hier mylib.cpp) -o (the file name of the target, jier mylib.o)
+
+
+CMAKE Reihenfolge:
+        1.) create code and cmale file
+        2.) mkdir build
+        3.) cd build
+        4.) cmake ..
+        5.) make
+        6.) ./Executable
+

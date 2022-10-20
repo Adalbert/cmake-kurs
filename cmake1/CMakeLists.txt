@@ -1,12 +1,13 @@
-#1.) create code and cmale file
-#2.) mkdir build
-#3.) cd build
-#4.) cmake ..
-#5.) make
-#6.) ./Executable
 
 cmake_minimum_required(VERSION 3.16)
 
 project(CppProjectTemplate VERSION 1.0.0 LANGUAGES CXX)
 
-add_executable(Executable main.cpp)
+set(EXECUTABLE_NAME Executable)
+set(LIBRARY_NAME Library)
+
+add_library(${LIBRARY_NAME} mylib.cpp)
+
+add_executable(${EXECUTABLE_NAME} main.cpp)
+
+target_link_libraries(${EXECUTABLE_NAME} ${LIBRARY_NAME})

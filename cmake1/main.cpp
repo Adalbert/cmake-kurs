@@ -1,5 +1,9 @@
 #include <iostream>
+#include "mylib.h"
 
 int main() {
-   std::cout << "Hello World!" << std::endl;
+
+   print_hw();
+
+   return 0;
 }
