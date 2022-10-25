@@ -8,9 +8,10 @@ set(EXECUTABLE_NAME Executable)
 set(LIBRARY_NAME Library)
 
 # library erstellen
-add_library(${LIBRARY_NAME} mylib.cpp)
+add_library(${LIBRARY_NAME} src/mylib.cpp)
+target_include_directories(${LIBRARY_NAME} PUBLIC src/)
 
-add_executable(${EXECUTABLE_NAME} main.cpp)
+add_executable(${EXECUTABLE_NAME} app/main.cpp)
 
 # target linken
-target_link_libraries(${EXECUTABLE_NAME} ${LIBRARY_NAME})
+target_link_libraries(${EXECUTABLE_NAME} PUBLIC ${LIBRARY_NAME})
