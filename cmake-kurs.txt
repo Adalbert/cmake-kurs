@@ -6,15 +6,48 @@
 in shell:
    make targetName
 
+------------------------------------------------------------------
+bsp: zwei dateien werden kompiliert und zusammen gebaut
+
+build:
+	g++ main.cpp -c
+	g++ my_lib.cpp -c
+	g++ main.o my_lib.o -o main
+
+
+------------------------------------------------------------------
+bsp mit dependecies:
+
+build: main.o my_lib.o              # anhängigkeiten; werden zuert ausgeführt
+	g++ main.o my_lib.o -o main
+
+main.o: 
+	g++ main.cpp -c
+
+my_lib.o:
+	g++ my_lib.cpp -c
+
+------------------------------------------------------------------
+
 debug-mode: -g
 
+------------------------------------------------------------------
 keine Optimierung: -O0
 höchste Optimierung: -O3
 
-starte Makefjile und übergebe einen Wert an eine Variable:
+starte Makefile und übergebe einen Wert an eine Variable:
 make build DEBUG=1
 
 Warnungslevel:  -Wall -Wextra -Wpedantic -Wconversion
+
+------------------------------------------------------------------
+
+ifeq($(DEBUG), 1)                           #if DEBUG == 1
+..
+endif
+
+------------------------------------------------------------------
+---  Pattern  ---
 
 patsubst = pattern substitution string
 
@@ -33,8 +66,296 @@ Pattern (targetPattern):
    $(CPP_COMPILER_CALL) -c $< -o $@  => g++ -03 -Wall ..  -c (the name of the first dependency, hier mylib.cpp) -o (the file name of the target, jier mylib.o)
 
 
+====================================================================
+
+Cpp Makefile Tutorial
+---------------------
+
+GCC/Clang Compiler Steps
+------------------------
+
+Compilation (Assembling)
+
+    Checks the C/C++ language syntax for error
+    Generates object files
+    Command: g++ main.cc -c
+    Produces: main.o
+
+Linker
+
+    Linking all the source files together, that is all the other object codes in the project.
+    Generates the executable file
+    Command: g++ main.o -o main
+    Produces: main.out (.exe for Windows)
+
+Compiler Flags
+
+    Debug: -g
+    Release: -O0 -O1 -O2 -O3 -Og
+    Includes: -I
+    Warnings: -Wall -Wextra -Wpedantic -Wconversion
+
+Makefile Commands of the Template
+Makefile Variables
+
+Convention is naming in upper snake_case.
+
+  VARIABLE_NAME = Value
+
+Variables can be called by $(VARIABLE_NAME)
+
+  $(VARIABLE_NAME)
+
+Makefile Targets
+
+Convention is naming in snake_case or camelCase.
+
+  targetName: Dependecies
+    Command
+
+Targets can be called by the make command.
+
+  make targetName
+
+Makefile Phony Target
+
+Sometimes you want your Makefile to run commands that do not represent files, for example the "clean" target. You may potentially have a file named clean in your main directory. In such a case Make will be confused because by default the clean target would be associated with this file and Make will only run it when the file doesn't appear to be up-to-date.
+
+.PHONY: clean
+clean:
+  rm -rf *.o
+
+In terms of Make, a phony target is simply a target that is always out-of-date, so whenever you ask make <phony_target>, it will run, independent from the state of the file system.
+Build the Executable
+
+Create the executable in either Debug or Release mode.
+
+  make build DEBUG=0 # Build type is debug
+  make build DEBUG=1 # Build type is release
+
+Run the Executable
+
+Run the executable in either Debug or Release mode.
+
+  make execute DEBUG=0 # Build type is debug
+  make execute DEBUG=1 # Build type is release
+
+Variables of the Makefile Template
+
+    Debug Mode: 1 (True) or 0 (False)
+    ENABLE_WARNINGS: 1 (True) or 0 (False)
+    WARNINGS_AS_ERRORS: 1 (True) or 0 (False)
+    CPP_STANDARD: c++11, c++14, c++17, etc.
+
+Important Shortcuts of the Makefile Template
+
+    $@: the file name of the target
+    $<: the name of the first dependency
+    $^: the names of all dependencies
+
+====================================================================
+
+CMake Tutorial
+--------------
+Generating a Project
+
+cmake [<options>] -S <path-to-source> -B <path-to-build>
+
+Assuming that a CMakeLists.txt is in the root directory, you can generate a project like the following.
+
+mkdir build
+cd build
+cmake -S .. -B . # Option 1
+cmake .. # Option 2
+
+Assuming that you have already built the CMake project, you can update the generated project.
+
+cd build
+cmake .
+
+Generator for GCC and Clang
+
+cd build
+cmake -S .. -B . -G "Unix Makefiles" # Option 1
+cmake .. -G "Unix Makefiles" # Option 2
+
+Generator for MSVC
+
+cd build
+cmake -S .. -B . -G "Visual Studio 16 2019" # Option 1
+cmake .. -G "Visual Studio 16 2019" # Option 2
+
+Get the list of Generators
+
+cmake --help
+
+Specify the Build Type
+
+Per default, the standard type is in most cases the debug type. If you want to generate the project, for example, in release mode you have to set the build type.
+
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+
+Passing Options
+
+If you have set some options in the CMakeLists, you can pass values in the command line.
+
+cd build
+cmake -DMY_OPTION=[ON|OFF] ..
+
+Specify the Build Target (Option 1)
+
+The standard build command would build all created targets within the CMakeLists. If you want to build a specific target, you can do so.
+
+cd build
+cmake --build . --target ExternalLibraries_Executable
+
+The target ExternalLibraries_Executable is just an example of a possible target name. Note: All dependent targets will be built beforehand.
+Specify the Build Target (Option 2)
+
+Besides setting the target within the cmake build command, you could also run the previously generated Makefile (from the generating step). If you want to build the ExternalLibraries_Executable, you could do the following.
+
+cd build
+make ExternalLibraries_Executable
+
+Run the Executable
+
+After generating the project and building a specific target you might want to run the executable. In the default case, the executable is stored in build/5_ExternalLibraries/app/ExternalLibraries_Executable, assuming that you are building the project 5_ExternalLibraries and the main file of the executable is in the app dir.
+
+cd build
+./bin/ExternalLibraries_Executable
+
+Different Linking Types
+
+add_library(A ...)
+add_library(B ...)
+add_library(C ...)
+
+PUBLIC
+
+target_link_libraries(A PUBLIC B)
+target_link_libraries(C PUBLIC A)
+
+When A links in B as PUBLIC, it says that A uses B in its implementation, and B is also used in A's public API. Hence, C can use B since it is part of the public API of A.
+PRIVATE
+
+target_link_libraries(A PRIVATE B)
+target_link_libraries(C PRIVATE A)
+
+When A links in B as PRIVATE, it is saying that A uses B in its implementation, but B is not used in any part of A's public API. Any code that makes calls into A would not need to refer directly to anything from B.
+INTERFACE
+
+add_library(D INTERFACE)
+target_include_directories(D INTERFACE {CMAKE_CURRENT_SOURCE_DIR}/include)
+
+In general, used for header-only libraries.
+Different Library Types
+Library
+
+A binary file that contains information about code. A library cannot be executed on its own. An application utilizes a library.
+Shared
+
+    Linux: *.so
+    MacOS: *.dylib
+    Windows: *.dll
+
+Shared libraries reduce the amount of code that is duplicated in each program that makes use of the library, keeping the binaries small. Shared libraries will however have a small additional cost for the execution. In general the shared library is in the same directory as the executable.
+Static
+
+    Linux/MacOS: *.a
+    Windows: *.lib
+
+Static libraries increase the overall size of the binary, but it means that you don't need to carry along a copy of the library that is being used. As the code is connected at compile time there are not any additional run-time loading costs.
+Important CMake Variables for Paths
+
+    CMAKE_SOURCE_DIR
+        Topmost folder (source directory) that contains a CMakeList.txt file.
+    PROJECT_SOURCE_DIR
+        Contains the full path to the root of your project source directory.
+    CMAKE_CURRENT_SOURCE_DIR
+        The directory where the currently processed CMakeLists.txt is located in.
+    CMAKE_CURRENT_LIST_DIR
+        The directory of the listfile currently being processed. (for example a *.cmake Module)
+    CMAKE_MODULE_PATH
+        Tell CMake to search first in directories listed in CMAKE_MODULE_PATH when you use FIND_PACKAGE() or INCLUDE().
+    CMAKE_BINARY_DIR
+        The filepath to the build directory
+
+Things you can set on targets
+
+    target_link_libraries: Other targets; can also pass library names directly
+    target_include_directories: Include directories
+    target_compile_features: The compiler features you need activated, like cxx_std_11
+    target_compile_definitions: Definitions
+    target_compile_options: More general compile flags
+    target_link_directories: Don’t use, give full paths instead (CMake 3.13+)
+    target_link_options: General link flags (CMake 3.13+)
+    target_sources: Add source files
+
+Custom Targets and Commands
+
+    When is needed to use add_custom_target? Each time we need to run a command to do something in our build system different to build a library or an executable.
+
+    When is a good idea to run a command in add_custom_target? When the command must be executed always the target is built.
+
+    When is a good idea to use add_custom_command? Always we want to run the command when is needed: if we need to generate a file (or more) or regenerate it if something changed in the source folder.
+
+    When is a good idea to use execute_process? Running a command at configure time.
+
+Macros vs Functions
+
+The only difference between a function and a macro is scope; macros don't have one. So, if you set a variable in a function and want it to be visible outside, you'll need PARENT_SCOPE.
+Generator Expressions
+
+Using generator expressions one can configure the project differently for different build types in multi-configuration generators. For such generators the project is configured (with running cmake) once, but can be built for several build types after that. Example of such generators is Visual Studio.
+
+For multiconfiguration generators CMAKE_BUILD_TYPE is not known at configuration stage. Because of that using if-else switching doesn't work:
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_options("/W4 /Wx")
+elif(CMAKE_BUILD_TYPE STREQUAL "Release")
+    add_compile_options("/W4")
+endif()
+
+But using conditional generator expressions works:
+
+add_compile_options(
+    $<$<CONFIG:Debug>:/W4 /Wx>
+    $<$<CONFIG:Release>:/W4>
+)
+
+The Visual Studio, XCode and Ninja Multi-Config generators let you have more than one configuration in the same build directory, and thus won't be using the CMAKE_BUILD_TYPE cache variable. Instead the CMAKE_CONFIGURATION_TYPES cache variable is used and contains the list of configurations to use for this build directory.
+Cross Compilation with Toolchain Files
+ARM 32 Cross
+
+cmake -B build_arm32 -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/arm32-cross-toolchain.cmake
+cmake --build build_arm32 -j8
+
+ARM 32 Native
+
+cmake -B build -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/arm32-native-toolchain.cmake
+cmake --build build -j8
+
+x86 64 MingW
+
+cmake -B build_mingw -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/x86-64-mingw-toolchain.cmake
+cmake --build build_mingw -j8
+
+x86 64 Native
+
+cmake -B build -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/x86-64-native-toolchain.cmake
+cmake --build build -j8
+
+====================================================================
+
+
+
+genaue Schreibweise beachten: CMakeLists.txt
+
+
+
 CMAKE Reihenfolge:
-        1.) create code and cmale file
+        1.) create code and cmake file
         2.) mkdir build
         3.) cd build
         4.) cmake ..
