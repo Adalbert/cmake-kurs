@@ -15,4 +15,5 @@ option(COMPILE_EXECUTABLE ON)
 add_subdirectory(src)
 
 add_executable(${EXECUTABLE_NAME} main.cpp)
+
 target_link_libraries(${EXECUTABLE_NAME} PUBLIC ${LIBRARY_NAME})
